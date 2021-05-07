@@ -1,0 +1,1185 @@
+{
+	"info": {
+		"_postman_id": "a7f71846-2755-45a4-a9f1-449f6ea7c40a",
+		"name": "AREA API",
+		"description": "__Description__:\n\nThis documentation is in order to indicate the route that we can found in middleware API.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth Routes",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response must be valid and have a body\", function () {",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Test if service is correct\", function () {",
+									"    const resp = pm.response.json();",
+									"    pm.globals.set(\"session_token_register\", resp.sessionToken)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"client@test.com\",\n    \"username\": \"client\",\n    \"password\": \"super\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.localhost/auth/register",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "__Description__:\n\nThis route is for register user with post method and body request.\n\n__Test__:\n* Route return status code 201\n* Route return valid body\n* Route return valid information about user registration"
+					},
+					"response": []
+				},
+				{
+					"name": "Register user with same credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response must be valid and have a body\", function () {",
+									"     pm.response.to.be.badRequest;",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"client@test.com\",\n    \"username\": \"client\",\n    \"password\": \"super\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.localhost/auth/register",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "__Description__:\n\nThis route is for register user with post method and body request.\n\n__Test__:\n* Route return status code 400\n* Route return valid body"
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response must be valid and have a body\", function () {",
+									"     pm.response.to.be.ok;",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Test if service is correct\", function () {",
+									"    const resp = pm.response.json();",
+									"    pm.expect(resp.objectId).is.eq('ULYfqkWJzo');",
+									"    pm.expect(resp.username).is.eq('Drijux');",
+									"    pm.globals.set(\"session_token_login\", resp.sessionToken)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://api.localhost/auth/login?username=Drijux&password=super",
+							"protocol": "http",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"auth",
+								"login"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "Drijux"
+								},
+								{
+									"key": "password",
+									"value": "super"
+								}
+							]
+						},
+						"description": "__Description__:\n\nThis route is for login user.\n\n__Test__:\n* Route return status code 200\n* Route return valid body\n* Route return valid information User connected"
+					},
+					"response": []
+				},
+				{
+					"name": "Failed Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Response must be valid and have a body\", function () {",
+									"     pm.response.to.be.notFound;",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://api.localhost/auth/login?username=Drijux&password=supe",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"auth",
+								"login"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "Drijux"
+								},
+								{
+									"key": "password",
+									"value": "supe"
+								}
+							]
+						},
+						"description": "__Description__:\n\nThis route is for login user with bad credentials.\n\n__Test__:\n* Route return status code 404\n* Route return valid body\n* Route return information about connection tentative"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{session_token_register}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://api.localhost/auth/delete",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"auth",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Services Routes",
+			"item": [
+				{
+					"name": "GET Service Spotify",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response must be valid and have a body\", function () {",
+									"     pm.response.to.be.ok;",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Test if service is correct\", function () {",
+									"    const resp = pm.response.json();",
+									"    pm.expect(resp.name).is.eq('Spotify');",
+									"    pm.expect(resp.objectId).is.eq('pXJSDNBC0q');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://api.localhost/service/spotify",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"service",
+								"spotify"
+							]
+						},
+						"description": "__Description__:\n\nThis route return information about service given in url parameters.\n\n__Test__:\n* Route return status code 200\n* Route return valid body\n* Route return valid information about Github Service"
+					},
+					"response": [
+						{
+							"name": "Service Spotify",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8083/service/spotify/",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8083",
+									"path": [
+										"service",
+										"spotify",
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Mon, 15 Feb 2021 17:37:44 GMT"
+								},
+								{
+									"key": "Server",
+									"value": "WSGIServer/0.2 CPython/3.8.7"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept, Cookie"
+								},
+								{
+									"key": "Allow",
+									"value": "GET, HEAD, OPTIONS"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Length",
+									"value": "566"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"objectId\": \"pXJSDNBC0q\",\n    \"name\": \"Spotify\",\n    \"logo\": \"path\",\n    \"auth_parameter\": {\n        \"url\": \"https://accounts.spotify.com/authorize?response_type=code&client_id=66f7de80cbcd46bb8dfb0e756702feb7&scope=user-read-private,user-read-email&redirect_uri=http://localhost:8083/service/spotify/callback&state=<session_token>\"\n    },\n    \"color\": {\n        \"green\": \"#1D8954\",\n        \"white\": \"#FFFFFF\",\n        \"black\": \"#191414\"\n    },\n    \"triggers\": [\n        {\n            \"name\": \"Create playlist\",\n            \"id\": \"spotify-create-playlist\",\n            \"parameters\": []\n        }\n    ],\n    \"reactions\": [\n        {\n            \"name\": \"Add Song\",\n            \"id\": \"spotify-add-song\",\n            \"parameters\": [\n                {\n                    \"name\": \"Song List\",\n                    \"type\": \"array\"\n                }\n            ]\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "GET Service Github",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response must be valid and have a body\", function () {",
+									"     pm.response.to.be.ok;",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Test if service is correct\", function () {",
+									"    const resp = pm.response.json();",
+									"    pm.expect(resp.name).is.eq('Github');",
+									"    pm.expect(resp.objectId).is.eq('bIGSDNTH0u');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://api.localhost/service/github",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"service",
+								"github"
+							]
+						},
+						"description": "__Description__:\n\nThis route return information about service given in url parameters.\n\n__Test__:\n* Route return status code 200\n* Route return valid body\n* Route return valid information about Spotify Service\n"
+					},
+					"response": [
+						{
+							"name": "Service Github",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://api.localhost/service/github",
+									"protocol": "https",
+									"host": [
+										"api",
+										"localhost"
+									],
+									"path": [
+										"service",
+										"github"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Allow",
+									"value": "GET, HEAD, OPTIONS"
+								},
+								{
+									"key": "Content-Length",
+									"value": "444"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 23 Feb 2021 14:58:44 GMT"
+								},
+								{
+									"key": "Server",
+									"value": "WSGIServer/0.2 CPython/3.8.7"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept, Origin, Cookie"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"objectId\": \"bIGSDNTH0u\",\n    \"name\": \"Github\",\n    \"logo\": \"path\",\n    \"auth_parameter\": {\n        \"url\": \"https://github.com/login/oauth/authorize?client_id=${githubId}&scope=repo,user&state=<session_token>\"\n    },\n    \"color\": {\n        \"white\": \"#FFFFFF\",\n        \"black\": \"#191414\"\n    },\n    \"triggers\": [\n        {\n            \"name\": \"Create repo\",\n            \"id\": \"github-create-repo\",\n            \"parameters\": []\n        }\n    ],\n    \"reactions\": [\n        {\n            \"name\": \"Add collaborator\",\n            \"id\": \"github-collaborator\",\n            \"parameters\": [\n                {\n                    \"name\": \"collaborator List\",\n                    \"type\": \"array\"\n                }\n            ]\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "GET Service error",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test Status Code\", function() {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://api.localhost/service/doest_exist/",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"service",
+								"doest_exist",
+								""
+							]
+						},
+						"description": "__Description__:\n\nThis route have to return an error on service not implemented in backend.\n\n__Tests__:\n* Route return status code 404 not found"
+					},
+					"response": [
+						{
+							"name": "Exemple Error",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8083/service/doest_exist/",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8083",
+									"path": [
+										"service",
+										"doest_exist",
+										""
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "html",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Mon, 15 Feb 2021 17:41:10 GMT"
+								},
+								{
+									"key": "Server",
+									"value": "WSGIServer/0.2 CPython/3.8.7"
+								},
+								{
+									"key": "Content-Type",
+									"value": "text/html; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept, Cookie"
+								},
+								{
+									"key": "Allow",
+									"value": "GET, HEAD, OPTIONS"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Length",
+									"value": "17"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								}
+							],
+							"cookie": [],
+							"body": "Service not found"
+						}
+					]
+				},
+				{
+					"name": "GET Service list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response must be valid and have a body\", function () {",
+									"     pm.response.to.be.ok;",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Test if service is correct\", function () {",
+									"    const resp = pm.response.json();",
+									"    pm.expect(Object.keys(resp['results']).length).is.eq(8);",
+									"    pm.expect(resp['results'][0].name).is.eq('Spotify');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{session_token_login}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Parse-Application-Id",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "X-Parse-REST-API-Key",
+								"value": "parse@master123!",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "https://api.localhost/services",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"services"
+							]
+						},
+						"description": "__Description__:\n\nThis route return information about service list.\nIf user token is given in Header as Bearer token, this route return list of service where user is not connected \n\n__Test__:\n* Route return status code 200\n* Route return valid body\n* Route return valid information about Service"
+					},
+					"response": []
+				}
+			],
+			"description": "__Route__: GET /service/<str:service_name>/\n\n__Description__:\nThis route take a service name in his url as string.\n\n__Error__:\n* 404: Service not found in database\n\n__Expected__:\nResult of this call is return under the from json.",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Area Routes",
+			"item": [
+				{
+					"name": "POST create AREA Spotify",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(202);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{session_token_login}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "SessionToken",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"services\": {\n        \"trigger\": \"pXJSDNBC0q\",\n        \"reaction\": \"pXJSDNBC0q\"\n    },\n    \"trigger\": {\n        \"id\": \"spotify-create-playlist\"\n    },\n    \"reaction\": {\n        \"id\": \"spotify-add-song\",\n        \"Song List\": [\n            \"Back in Black\",\n            \"Sweet Home Alabama\"\n        ]\n    }\n}"
+						},
+						"url": {
+							"raw": "https://api.localhost/area/",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"area",
+								""
+							]
+						},
+						"description": "This route is for create AREA in our backend."
+					},
+					"response": []
+				},
+				{
+					"name": "POST create AREA Github",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(202);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{session_token_login}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "SessionToken",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"services\": {\n        \"trigger\": \"bIGSDNTH0u\",\n        \"reaction\": \"bIGSDNTH0u\"\n    },\n    \"trigger\": {\n        \"id\": \"github-create-repo\"\n    },\n    \"reaction\": {\n        \"id\": \"github-collaborator\",\n        \"Song List\": [\n            \"Basilarc\",\n            \"UltimMilo\"\n        ]\n    }\n}"
+						},
+						"url": {
+							"raw": "https://api.localhost/area/",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"area",
+								""
+							]
+						},
+						"description": "This route is for create AREA in our backend with Github service."
+					},
+					"response": []
+				},
+				{
+					"name": "Post create AREA Discord",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(202);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{session_token_login}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"services\": {\n        \"trigger\": \"PvAPuOIELm\",\n        \"reaction\": \"pXJSDNBC0q\"\n    },\n    \"trigger\": {\n        \"id\": \"discord-new-server\"\n    },\n    \"reaction\": {\n        \"id\": \"spotify-add-song\",\n        \"Song List\": [\n            \"Back in Black\",\n            \"Sweet Home Alabama\"\n        ]\n    }\n}"
+						},
+						"url": {
+							"raw": "https://api.localhost/area/",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"area",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post create AREA Twitch",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(202);",
+									"    const resp = pm.response.json();",
+									"    pm.globals.set(\"area_id\", resp.objectId)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{session_token_login}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"services\": {\n        \"trigger\": \"trWdCHTHIu\",\n        \"reaction\": \"pXJSDNBC0q\"\n    },\n    \"trigger\": {\n        \"id\": \"twitch-stream-actif\",\n        \"Streamer list\": [\n            \"Alderiate\",\n            \"Skyyart\",\n            \"domingo\"\n        ]\n    },\n    \"reaction\": {\n        \"id\": \"spotify-add-song\",\n        \"Song List\": [\n            \"Back in Black\",\n            \"Sweet Home Alabama\"\n        ],\n        \"Playlist\": \"PAP\"\n    }\n}"
+						},
+						"url": {
+							"raw": "https://api.localhost/area/",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"area",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET User area LIst",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response must be valid and have a body\", function () {",
+									"     pm.response.to.be.ok;",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test(\"Test if area list is correct\", function () {",
+									"    const resp = pm.response.json();",
+									"    console.log(Object.keys(resp).length)",
+									"    pm.expect(Object.keys(resp).length).is.gte(2);",
+									"    pm.expect(resp[0].trigger).is.eq('spotify-create-playlist')",
+									"    pm.expect(resp[1].trigger).is.eq('github-create-repo')",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{session_token_login}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.localhost/area",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"area"
+							]
+						},
+						"description": "__Description__:\n\nThis route return AREA List given in url parameters.\n\n__Test__:\n* Route return status code 200\n* Route return valid body\n* Route return valid information about Spotify/Github AREA"
+					},
+					"response": [
+						{
+							"name": "User area LIst",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer r:5997f258bb022c2e92c4518c3f7fb378",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://api.localhost/area/",
+									"protocol": "https",
+									"host": [
+										"api",
+										"localhost"
+									],
+									"path": [
+										"area",
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Allow",
+									"value": "GET, POST, HEAD, OPTIONS"
+								},
+								{
+									"key": "Content-Length",
+									"value": "189"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 16 Feb 2021 13:28:36 GMT"
+								},
+								{
+									"key": "Server",
+									"value": "WSGIServer/0.2 CPython/3.8.7"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept, Cookie"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"objectId\": \"tzlezZB4dk\",\n        \"trigger\": \"spotify-create-playlist\",\n        \"reactions\": [\n            \"spotify-add-song\"\n        ]\n    },\n    {\n        \"objectId\": \"GZCkUV6Zqw\",\n        \"trigger\": \"github-create-repo\",\n        \"reactions\": [\n            \"github-collaborator\"\n        ]\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Get area by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{session_token_login}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://api.localhost/area/yvL2CXtYGE",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"area",
+								"yvL2CXtYGE"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Update AREA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{session_token_login}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"is_actif\": true\n}"
+						},
+						"url": {
+							"raw": "https://api.localhost/area/z1CKS4HP8T/",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"area",
+								"z1CKS4HP8T",
+								""
+							]
+						},
+						"description": "__Description__:\n\nThis route update an area."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete area",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test status code\", function() {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{session_token_login}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://api.localhost/area/{{area_id}}/",
+							"protocol": "https",
+							"host": [
+								"api",
+								"localhost"
+							],
+							"path": [
+								"area",
+								"{{area_id}}",
+								""
+							]
+						},
+						"description": "This route delete an area by Area Id."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

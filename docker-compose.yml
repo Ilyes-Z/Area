@@ -1,0 +1,319 @@
+version: "3"
+services:
+
+    # faire cette commande : docker network create traefik-public  , pour que docker ce lance correctement
+    traefik:
+      image: traefik:v2.4
+      container_name: traefik
+      restart: unless-stopped
+      command:
+        # entrypoints
+        - "--entrypoints.web.address=:80"
+        - "--entrypoints.websecure.address=:443"
+        - "--entrypoints.epiback.address=:8080"
+        - "--entrypoints.epifront.address=:8081"
+        - "--entrypoints.traefik.address=:8082"
+
+        - "--api.debug=false"
+        - "--log.level=DEBUG"
+        - "--providers.docker"
+        - "--providers.docker.network=area_traefik-public"
+
+        # Zone HTTPS
+        - "--certificatesresolvers.arearesolver.acme.httpchallenge=true"
+        - "--certificatesresolvers.arearesolver.acme.httpchallenge.entrypoint=web"
+        - "--certificatesresolvers.arearesolver.acme.email=matthis.cusin@gmail.com"
+        - "--certificatesresolvers.arearesolver.acme.storage=/letsencrypt/acme.json"
+      expose:
+        - "8082"
+      ports:
+       - 80:80
+       - 443:443
+       - 8080:8080
+       - 8081:8081
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - "./letsencrypt:/letsencrypt"
+      networks:
+        - traefik-public
+      labels:
+        - "traefik.http.routers.epiback.rule=Host(`${AREA_HOST}`)"
+        - "traefik.http.routers.epiback.entrypoints=epiback"
+        - "traefik.http.routers.epiback.middlewares=redirect-epiback"
+
+        - "traefik.http.middlewares.redirect-epiback.redirectregex.regex=(http(s*)://)?${AREA_HOST}:8080/(.*)"
+        - "traefik.http.middlewares.redirect-epiback.redirectregex.replacement=http://api.${AREA_HOST}/$${3}"
+
+        - "traefik.http.routers.epifront.rule=Host(`${AREA_HOST}`)"
+        - "traefik.http.routers.epifront.entrypoints=epifront, web"
+        - "traefik.http.routers.epifront.middlewares=redirect-epifront"
+
+        - "traefik.http.middlewares.redirect-epifront.redirectregex.regex=(http(s*)://)?${AREA_HOST}(:8081)?/(.*)"
+        - "traefik.http.middlewares.redirect-epifront.redirectregex.replacement=https://www.${AREA_HOST}/$${4}"
+
+        - "traefik.http.middlewares.prefix-stripper.stripprefix.prefixes=/hooks"
+
+        # In order to access traefik dashboard (uncomment to switch on)
+        # - "traefik.enable=true"
+        # - "traefik.http.routers.traefik.tls=false" # a modifier pour securiser les comm
+        # - "traefik.http.routers.traefik.rule=HostRegexp(`traefik.{host:.+}`)"
+        # # admin:area2021traf
+        # - "traefik.http.middlewares.auth.basicauth.users=admin:$apr1$CDg7Euc3$MUc/X/JWzplpsExPsLK1H."
+        # - "traefik.http.routers.traefik.service=api@internal"
+    
+    django:
+      build: ./back/django
+      container_name: django
+
+    mobile:
+      container_name: mobile-app
+      build: ./front/app
+      volumes:
+        - apk-build:/usr/apk
+
+    server:
+      build: ./back/middleware
+      container_name: server
+      command: bash -c "python manage.py runserver 0.0.0.0:6060"
+      environment:
+        - AREA_APP_PATH=/usr/apk/area.apk
+        - AREA_HOST=${AREA_HOST}
+      volumes:
+        - apk-build:/usr/apk
+      depends_on:
+        - django
+        - mobile
+        - parse-server
+        - poll
+        - reaction
+        - traefik
+      expose:
+        - "6060"
+      networks:
+        - db-tier
+        - traefik-public
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.mid-http-api.rule=Host(`api.${AREA_HOST}`)"
+        - "traefik.http.routers.mid-http-api.entrypoints=web"
+        - "traefik.http.routers.mid-http-api.middlewares=redirect-mid-https"
+
+        - "traefik.http.routers.mid-https-api.rule=Host(`api.${AREA_HOST}`)"
+        - "traefik.http.routers.mid-https-api.entrypoints=websecure"
+        - "traefik.http.routers.mid-https-api.middlewares=prefix-stripper"
+        - "traefik.http.routers.mid-https-api.tls.certresolver=arearesolver"
+
+        - "traefik.http.middlewares.redirect-mid-https.redirectscheme.scheme=https"
+
+    poll:
+      build: ./back/poll
+      container_name: poll
+      restart: unless-stopped
+      environment: 
+        - AREA_HOST=${AREA_HOST}
+      depends_on:
+        - parse-server
+      expose:
+        - "6060"
+      networks:
+        - db-tier
+
+    reaction:
+      build: ./back/reaction
+      container_name: reaction
+      command: bash -c "python manage.py runserver 0.0.0.0:6060"
+      environment:
+        - AREA_HOST=${AREA_HOST}
+      depends_on:
+        - django
+        - trigger
+        - parse-server
+      expose:
+        - "6060"
+      networks:
+        - db-tier
+        - back-tier
+        - traefik-public
+
+    trigger:
+      build: ./back/trigger
+      container_name: trigger
+      command: bash -c "python manage.py runserver 0.0.0.0:6060"
+      environment:
+        - AREA_HOST=${AREA_HOST}
+      depends_on:
+        - django
+        - parse-server
+      expose:
+        - "6060"
+      networks:
+        - db-tier
+        - traefik-public
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.hooks-http-api.rule=Host(`api.${AREA_HOST}`) && PathPrefix(`/hooks`)"
+        - "traefik.http.routers.hooks-http-api.entrypoints=web"
+        - "traefik.http.routers.hooks-http-api.middlewares=redirect-hooks-https"
+        - "traefik.http.routers.hooks-http-api.priority=42"
+
+        - "traefik.http.routers.hooks-https-api.rule=Host(`api.${AREA_HOST}`) && PathPrefix(`/hooks`)"
+        - "traefik.http.routers.hooks-https-api.entrypoints=websecure"
+        - "traefik.http.routers.hooks-https-api.middlewares=prefix-stripper"
+        - "traefik.http.routers.hooks-https-api.tls.certresolver=arearesolver"
+        - "traefik.http.routers.hooks-https-api.priority=43"
+        - "traefik.http.middlewares.redirect-hooks-https.redirectscheme.scheme=https"
+
+    smtpserver:
+      image: namshi/smtp:latest
+      container_name: smtp-server
+      restart: unless-stopped
+      networks:
+        - back-tier
+      environment:
+        - SMARTHOST_USER=area
+        - SMARTHOST_PASSWORD=area2021=)
+      expose:
+        - 25:25
+
+    mongo-express:
+      image: mongo-express
+      container_name: mongo-express
+      restart: always
+      ports:
+        - "8089:8081"
+      expose:
+        - "8081"
+      environment:
+        ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+        ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+        ME_CONFIG_MONGODB_PORT: "27017"
+      networks:
+        - db-tier
+      depends_on:
+        - "mongo"
+
+    mongo:
+      image: mongo
+      container_name: mongo
+      expose:
+        - "27017"
+      volumes:
+        - db-data:/data/db
+        - ./init-mongo.js:/docker-entrypoint-initdb.d/init.js
+      environment:
+        MONDO_INITDB_DATABASE: area
+        MONGO_INITDB_ROOT_USERNAME: admin
+        MONGO_INITDB_ROOT_PASSWORD: admin
+        MONGO_USERNAME: 'api'
+        MONGO_PASSWORD: 'password'
+      networks:
+        - db-tier
+
+    parse-server:
+      build: ./back/parse
+      container_name: parse-server
+      restart: unless-stopped
+      environment:
+        - PARSE_SERVER_APPLICATION_ID=
+        - PARSE_SERVER_MASTER_KEY=
+        - PARSE_SERVER_DATABASE_URI=mongodb://admin:admin@mongo:27017/
+        - PARSE_SERVER_APP_NAME=area
+        - PARSE_PUBLIC_SERVER_URL=https://api.${AREA_HOST}/parse
+        - PARSE_SERVER_VERIFY_USER_EMAILS=true
+      volumes:
+        - ./back/parse/config:/config
+        - ./back/parse/templates:/parse-server/views/email/templates
+      command:  /config/config.js
+      expose:
+        - "25/tcp"
+        - "25/udp"
+        - "1337"
+      networks:
+        - back-tier
+        - db-tier
+        - traefik-public
+      depends_on:
+        - mongo
+        - smtpserver
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.parse-http-api.rule=Host(`api.${AREA_HOST}`) && PathPrefix(`/parse`)"
+        - "traefik.http.routers.parse-http-api.entrypoints=web"
+        - "traefik.http.routers.parse-http-api.middlewares=redirect-parse-https"
+        - "traefik.http.services.parse-server.loadbalancer.server.port=1337"
+
+        - "traefik.http.routers.parse-https-api.rule=Host(`api.${AREA_HOST}`) && PathPrefix(`/parse`)"
+        - "traefik.http.routers.parse-https-api.entrypoints=websecure"
+        - "traefik.http.routers.parse-https-api.middlewares=prefix-stripper"
+        - "traefik.http.routers.parse-https-api.tls.certresolver=arearesolver"
+
+        - "traefik.http.middlewares.redirect-parse-https.redirectscheme.scheme=https"
+
+    parse-dashboard:
+      image: 'parseplatform/parse-dashboard'
+      container_name: parse-dashboard
+      expose:
+        - '4040'
+      links:
+        - parse-server
+      depends_on:
+        - parse-server
+      networks:
+        - parse-tier
+      environment:
+        - PARSE_DASHBOARD_ALLOW_INSECURE_HTTP=1
+        - PARSE_DASHBOARD_SERVER_URL=http://parse-server/parse
+        - PARSE-PARSE_DASHBOARD_APP_NAME=parse
+        - PARSE_DASHBOARD_APP_ID=
+        - PARSE_DASHBOARD_MASTER_KEY=
+        - PARSE_DASHBOARD_USER_ID=admin
+        - PARSE_DASHBOARD_USER_PASSWORD=password
+
+    front:
+      container_name: front
+      build:
+        context: ./front/web
+        dockerfile: Dockerfile
+        args:
+          - AREA_HOST=${AREA_HOST}
+          - APK_PATH=/usr/src/app/apk/area.apk
+      volumes:
+        - apk-build:/usr/share/nginx/html/apk/
+        - /usr/src/app/node_modules
+      restart: unless-stopped
+      depends_on: 
+        - server
+      environment:
+        - PORT=3000
+        - HOST=0.0.0.0
+      networks:
+        - traefik-public
+      expose:
+        - "3000"
+      labels:
+        - "traefik.enable=true"
+
+        - "traefik.http.routers.epifront-https-www.rule=Host(`www.${AREA_HOST}`)"
+        - "traefik.http.routers.epifront-https-www.entrypoints=web"
+        - "traefik.http.routers.epifront-https-www.middlewares=front-redirect-https"
+
+        - "traefik.http.middlewares.front-redirect-https.redirectscheme.scheme=https"
+
+        - "traefik.http.routers.epifront-http-www.rule=Host(`www.${AREA_HOST}`)"
+        - "traefik.http.routers.epifront-http-www.entrypoints=websecure"
+        - "traefik.http.routers.epifront-http-www.tls.certresolver=arearesolver"
+        - "traefik.http.services.front.loadbalancer.server.port=3000"
+
+volumes:
+  db-data:
+  apk-build:
+
+networks:
+  db-tier:
+    driver: bridge
+  back-tier:
+    driver: bridge
+  parse-tier:
+    driver: bridge
+  traefik-public:
+    driver: bridge

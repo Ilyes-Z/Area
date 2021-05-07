@@ -1,0 +1,19 @@
+{
+  "arearesolver": {
+    "Account": {
+      "Email": "ilyes.huus@gmail.com",
+      "Registration": {
+        "body": {
+          "status": "valid",
+          "contact": [
+            "mailto:ilyes.huus@gmail.com"
+          ]
+        },
+        "uri": ""
+      },
+      "PrivateKey": "",
+      "KeyType": ""
+    },
+    "Certificates": null
+  }
+}

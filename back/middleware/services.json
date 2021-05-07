@@ -1,0 +1,41 @@
+{
+    "services": [
+        {
+            "name": "Spotify",
+            "auth-parameter": {
+                "oauth-url": "https://www.spotify.com/",
+                "callback-url": ""
+            },
+            "logo": "https://developer.spotify.com/assets/branding-guidelines/icon1@2x.png",
+            "color": {
+                "green": "#1DB954",
+                "white": "#FFFFFF",
+                "black": "#191414"
+            },
+            "triggers": [
+                {
+                    "id": "new-playlist",
+                    "name": "Création d'une playlist",
+                    "parameters": {}
+                },
+                {
+                    "id": "new-song-in-playlist",
+                    "name": "Ajout d'un son dans une playlist",
+                    "parameters": {
+                        "playlist": "string"
+                    }
+                }
+            ],
+            "reactions": [
+                {
+                    "id": "add-song-to-playlist",
+                    "name": "Ajouter un son à une playlist",
+                    "parameters": {
+                        "playlist-name": "string",
+                        "song-list": "array"
+                    }
+                }
+            ]
+        }
+    ]
+}
